@@ -44,7 +44,7 @@ class TripAdvisorSpider(scrapy.Spider):
             item['review_count'] = items[1] if len(items)>1 else None
             item['hotel_rank'] = items[2] if len(items)>2 else None
 
-        item['amenities'] = about_tab.css("._c::text").get()
+        item['amenities'] = about_tab.css('[data-test-target="amenity_text"]::text').getall()
         item['languages'] = about_tab.css(".ssr-init-26f .H::text").get()
         item['reviews'] = response.css(".H4 span::text").getall()
         item['hotel_class'] = response.css(".H~ .H::text").getall()
