@@ -9,14 +9,14 @@ class SingaporeHotelSpier(scrapy.Spider):
     def start_requests(self):
         url = "https://www.tripadvisor.in/Hotels-g294265-Singapore-Hotels.html"
         yield SplashRequest(url, self.parse,
-                            args={'wait': 1, 'viewport': '1024x2480', 'timeout': 90, 'images': 0,
+                            args={'wait': 1, 'viewport': '1024x2480', 'timeout': 1000, 'images': 0,
                                   'resource_timeout': 20},
                             )
 
     def parse(self, response):
         # iterating through all hotels in a given page
         hotel_tiles = response.css("div.listItem")
-        for hotel in hotel_tiles[:5]:
+        for hotel in hotel_tiles:
             next_page_route = hotel.css(".property_title::attr(href)").get()
             hotel_page = "https://www.tripadvisor.in/" + next_page_route
             if hotel_page is not None:
