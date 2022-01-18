@@ -2,8 +2,8 @@ import scrapy
 from scrapy_splash import SplashRequest
 
 
-class TripAdvisorSpider(scrapy.Spider):
-    name = 'hoteldetails'
+class SingaporeHotelSpier(scrapy.Spider):
+    name = 'singapore_hotels'
     page_counter = 0
 
     def start_requests(self):
@@ -16,15 +16,15 @@ class TripAdvisorSpider(scrapy.Spider):
     def parse(self, response):
         # iterating through all hotels in a given page
         hotel_tiles = response.css("div.listItem")
-        for hotel in hotel_tiles:
+        for hotel in hotel_tiles[:5]:
             next_page_route = hotel.css(".property_title::attr(href)").get()
             hotel_page = "https://www.tripadvisor.in/" + next_page_route
             if hotel_page is not None:
                 yield response.follow(hotel_page, callback=self.parseHotelDetails)
 
         # going to another page through pagination
-        page_count_str = "-oa" + str(TripAdvisorSpider.page_counter) if TripAdvisorSpider.page_counter > 0 else ''
-        TripAdvisorSpider.page_counter += 30
+        page_count_str = "-oa" + str(SingaporeHotelSpier.page_counter) if SingaporeHotelSpier.page_counter > 0 else ''
+        SingaporeHotelSpier.page_counter += 30
 
         next_page = "https://www.tripadvisor.in/Hotels-g294265" + page_count_str + "-Singapore-Hotels.html"
         if next_page is not None:
@@ -53,6 +53,7 @@ class TripAdvisorSpider(scrapy.Spider):
         item['attractions_nearby'] = response.css(".eKwbS::text").get()
         item['good_for_walkers_out_of_100'] = response.css(".dfNPK::text").get()
         item['top_cuisines'] = response.css(".e:nth-child(2) .chXJi::text").getall()
+        item['covid_safety_measures'] = response.css(".baBUh::text").getall()
 
         # get links to restaurants
         links = response.css('[class="seeNearby bBadB _R Mb S4 H3 b"]::attr(href)').getall()
@@ -90,4 +91,17 @@ class TripAdvisorSpider(scrapy.Spider):
 
         items['restaurants'] = restaurants_list
 
+        link_to_tourist_attractions = response.meta.get('link_to_tourist_attractions')
+        if link_to_tourist_attractions is not None:
+            yield response.follow(link_to_tourist_attractions,
+                                  callback=self.parseAttractionsNearby,
+                                  meta={
+                                      'items': items,
+                                  }
+                                )
+        else:
+            yield items
+
+    def parseAttractionsNearby(self, response):
+        items = response.meta.get('items')
         yield items
