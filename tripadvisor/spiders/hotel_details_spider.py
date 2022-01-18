@@ -53,7 +53,7 @@ class SingaporeHotelSpier(scrapy.Spider):
         item['attractions_nearby'] = response.css(".eKwbS::text").get()
         item['good_for_walkers_out_of_100'] = response.css(".dfNPK::text").get()
         item['top_cuisines'] = response.css(".e:nth-child(2) .chXJi::text").getall()
-        item['covid_safety_measures'] = response.css(".baBUh::text").getall()
+        # item['covid_safety_measures'] = response.css(".baBUh::text").getall()
 
         # get links to restaurants
         links = response.css('[class="seeNearby bBadB _R Mb S4 H3 b"]::attr(href)').getall()
