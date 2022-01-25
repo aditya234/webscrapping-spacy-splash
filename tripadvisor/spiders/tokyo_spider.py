@@ -9,7 +9,7 @@ class TokyoHotelSpier(scrapy.Spider):
     def start_requests(self):
         url = "https://www.tripadvisor.in/Hotels-g298184-Tokyo_Tokyo_Prefecture_Kanto-Hotels.html"
         yield SplashRequest(url, self.parse,
-                            args={'wait': 1, 'viewport': '1024x2480', 'timeout': 90, 'images': 0,
+                            args={'wait': 10, 'viewport': '1024x2480', 'timeout': 90,
                                   'resource_timeout': 20},
                             )
 
@@ -45,7 +45,8 @@ class TokyoHotelSpier(scrapy.Spider):
 
         item['amenities'] = about_tab.css('[data-test-target="amenity_text"]::text').getall()
         item['languages'] = about_tab.css(".ssr-init-26f .H::text").get()
-        item['reviews'] = response.css(".H4 span::text").getall()
+        # commenting scraping of reviews because we don't need it as of
+        # item['reviews'] = response.css(".H4 span::text").getall()
         item['hotel_class'] = response.css(".H~ .H::text").getall()
         item['price'] = response.css('.bookableOffer::attr(data-pernight)').get()
         item['best_price_source'] = response.css('.bookableOffer::attr(data-vendorname)').get()
@@ -53,7 +54,8 @@ class TokyoHotelSpier(scrapy.Spider):
         item['attractions_nearby'] = response.css(".eKwbS::text").get()
         item['good_for_walkers_out_of_100'] = response.css(".dfNPK::text").get()
         item['top_cuisines'] = response.css(".e:nth-child(2) .chXJi::text").getall()
-        # item['covid_safety_measures'] = response.css(".baBUh::text").getall()
+        item['lat_long_link'] = response.css('#LOCATION .yYjkv::text').get()
+        item['best_features_as_per_reviews'] = response.css('.bjRcr::text').getall()
 
         # get links to restaurants
         links = response.css('[class="seeNearby bBadB _R Mb S4 H3 b"]::attr(href)').getall()
